@@ -198,24 +198,5 @@ If everything worked, henceforth you'll only need `Step 4 - Regenerate Attendanc
 
 This is almost as far as we can go without Jethro code modifications. I tried a database trigger to regenerate group memberships when person status/congregation changed, but it failed (`General error: 1442 Can't update table 'person_group_membership' in stored function/trigger because it is already used by statement which invoked this stored function/trigger`).
 
-The two steps (automating group membership repopulation and automatically rolling up congregation attendances) could be triggered by an external shell script. It would need to detect database changes (with the checksums below).
-
-```sql
-MariaDB [jethro]> select MD5(GROUP_CONCAT(CONCAT_WS('#',id, congregationid, status) ORDER BY id)) AS person_checksum FROM _person;
-+----------------------------------+
-| person_checksum                  |
-+----------------------------------+
-| e20c8b6bdd4b4b6391b20c91163bda56 |
-+----------------------------------+
-1 row in set (0.000 sec)
-MariaDB [jethro]> SELECT MD5(GROUP_CONCAT(CONCAT_WS('#', personid, groupid, membership_status, created) ORDER BY created)) AS table_checksum FROM person_group_membership where groupid!=0;
-+----------------------------------+
-| table_checksum                   |
-+----------------------------------+
-| dd654c4f14eaa6fe4ca603fe7fd2a8db |
-+----------------------------------+
-1 row in set (0.001 sec)
-```
-
-A script that does this can be found in `attendancegroup_refresher/`.
+The two steps (automating group membership repopulation and automatically rolling up congregation attendances) could be triggered by an external shell script. A script that does this can be found in `attendancegroup_refresher/`.
 

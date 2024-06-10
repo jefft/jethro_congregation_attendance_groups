@@ -27,7 +27,7 @@ regen_groupmembers() {
 
 regen_congregation_attendances() {
 	local attendance_checksum attendance_checksum_old
-	attendance_checksum="$(atl_mysql -sBe "SELECT MD5(GROUP_CONCAT(CONCAT_WS('#', personid, groupid, membership_status, created) ORDER BY created)) AS table_checksum FROM person_group_membership where groupid!=0;")"
+	attendance_checksum="$(atl_mysql -sBe "SELECT MD5(GROUP_CONCAT(CONCAT_WS('#', personid, groupid, membership_status, created) ORDER BY created)) AS attendance_checksum FROM person_group_membership where groupid!=0;")"
 	if [[ -f attendance_checksum ]]; then
 		attendance_checksum_old="$(cat attendance_checksum)"
 	fi
