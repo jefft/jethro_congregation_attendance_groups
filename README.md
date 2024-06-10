@@ -24,7 +24,7 @@ Since theoretically anyone known to Jethro might attend any service, each Attend
 
 Normally a Custom Report's purpose is to generate a tabular read-only 'report', there's no reason the SQL can't make changes to Jethro's database too. In our case, clicking on our 'report' causes Attendance Group memberships to be wiped and re-populated.
 
-While each Attendance Group has to contain every Jethro person, we set each person's group 'membership status' to reflect the likelihood of them attending. People in the 10am congregation get the highest 'Member' membership status in the '10am' Attendance Group, and thus appear at the top of the attendance marker's list. Next appear 10am'ers who are less regular ('Fringe' group membership status), and last of all, people in other congregations like 4pm ('Other Congregation' membership status).
+While each Attendance Group has to contain every Jethro person, we set each person's group 'membership status' to reflect the likelihood of them attending. People in the 10am congregation get the highest 'Member' membership status in the '10am' Attendance Group, and thus appear at the top of the attendance marker's list. Next appear 10am'ers who are less regular ('crowd' person status mapping to Fringe' group membership status), and last of all, people in other congregations like 4pm ('Other Congregation' membership status).
 
 | People | 10am Attendance Group | 4pm Attendance Group
 |----|---|--|
@@ -33,7 +33,7 @@ While each Attendance Group has to contain every Jethro person, we set each pers
 
 The rules for allocating Membership Status are embodied in the SQL 'report', which you will need to customise initially, as your Jethro will have different Person Status Options ('regular', 'irregular' etc) and Group Membership Status Options ('Leader', 'Member' etc), and you may have different ideas on how they should map. But once you have customized the SQL, with one click your Attendance Groups will be populated with every possible attendee, sorted by likelihood of attendance. The report should be clicked weekly, before marking attendance, so the Attendance Group contains any new persons added that week, and reflects status/congregation changes for existing persons.
 
-Attendance Group memberships should never be modified by hand, as changes will be lost next time the report is clicked. Hopefully one day Jethro will support read-only groups to enforce this, but for now your Jethro users will just have to remember.
+Attendance Group memberships should never be modified by hand, as changes will be lost next time the report is clicked. Hopefully one day Jethro will support read-only groups to enforce this, but for now your Jethro members will just have to remember.
 
 ### Secondary Congregations
 
@@ -58,9 +58,11 @@ For example, given the following 10am and 4pm Attendance Group records:
 |---------------------------------------------------------------|-----|
 | ![img_8.png](img/cag_10am_attendance.png)  | ![img_7.png](img/cag_4pm_attendance.png)    |
 
-The 4pm congregation attendances become:
+The congregation attendances become:
 
-![img_9.png](img/cong_4pm_attendance.png)
+| 10am                                                          | 4pm |
+|---------------------------------------------------------------|-----|
+| ![img.png](img/cong_10am_attendance.png) | ![img_9.png](img/cong_4pm_attendance.png) |
 
 Notice that Hans Luther was absent from his native 4pm service, but attended 10am that day as a guest, and so is marked Present in the 4pm congregation rollup.
 
@@ -191,3 +193,29 @@ After Step 6, go to Attendance -> Display, pick a congregation (not a group), an
 ### Step 7
 
 If everything worked, henceforth you'll only need `Step 4 - Regenerate Attendance Group Members` and `Step 6 - Regenerate Congregational Attendances From Congregation Attendance Groups` and can delete the rest to avoid confusion.
+
+# Future Work
+
+This is almost as far as we can go without Jethro code modifications. I tried a database trigger to regenerate group memberships when person status/congregation changed, but it failed (`General error: 1442 Can't update table 'person_group_membership' in stored function/trigger because it is already used by statement which invoked this stored function/trigger`).
+
+The two steps (automating group membership repopulation and automatically rolling up congregation attendances) could be triggered by an external shell script. It would need to detect database changes (with the checksums below).
+
+```sql
+MariaDB [jethro]> select MD5(GROUP_CONCAT(CONCAT_WS('#',id, congregationid, status) ORDER BY id)) AS person_checksum FROM _person;
++----------------------------------+
+| person_checksum                  |
++----------------------------------+
+| e20c8b6bdd4b4b6391b20c91163bda56 |
++----------------------------------+
+1 row in set (0.000 sec)
+MariaDB [jethro]> SELECT MD5(GROUP_CONCAT(CONCAT_WS('#', personid, groupid, membership_status, created) ORDER BY created)) AS table_checksum FROM person_group_membership where groupid!=0;
++----------------------------------+
+| table_checksum                   |
++----------------------------------+
+| dd654c4f14eaa6fe4ca603fe7fd2a8db |
++----------------------------------+
+1 row in set (0.001 sec)
+```
+
+A script that does this can be found in `attendancegroup_refresher/`.
+
