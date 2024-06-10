@@ -1,0 +1,12 @@
+[Unit]
+Description=Keeps Jethro's Congregation Attendance Groups and Congregation attendances up-to-date.
+Documentation=https://github.com/jefft/jethro_congregation_attendance_groups
+
+[Service]
+ExecStart = /home/easyjethro/accounts/demo/.env/atl_env /home/easyjethro/accounts/demo/custom_reports/attendancegroup_refresher/jethro_attendancegroup_refresher.sh
+
+Type = oneshot
+
+[Install]
+WantedBy = default.target
+

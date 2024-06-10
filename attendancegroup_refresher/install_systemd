@@ -1,0 +1,12 @@
+#!/bin/bash
+
+[[ $EUID = 0 ]] || { echo >&2 "Must run as sudo / root"; exit 1; }
+
+systemctl enable `pwd`/jethro_attendancegroup_refresher.service
+systemctl enable `pwd`/jethro_attendancegroup_refresher.timer
+systemctl daemon-reload
+systemctl start jethro_attendancegroup_refresher.timer
+systemctl list-timers jethro\*
+
+echo "Systemd service and timer files should now be copied to /etc/systemd/system/"
+

@@ -1,0 +1,3 @@
+A hacky script to automatically invoke SQL regenerating Congregation Attendance Group memberships, or congregation rollup attendances as needed.
+
+You will need to customize the paths in jethro_attendancegroup_refresher.service at the very least. Also, replace 'atl_mysql' with 'mysql' or some script that runs as the right MySQL user.

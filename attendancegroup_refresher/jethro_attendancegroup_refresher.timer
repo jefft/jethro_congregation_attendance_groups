@@ -1,0 +1,11 @@
+[Unit]
+Description=Keeps Jethro's Congregation Attendance Groups and Congregation attendances up-to-date.
+
+[Timer]
+# https://www.freedesktop.org/software/systemd/man/systemd.time.html
+# Every 10 minutes
+OnCalendar=*-*-* *:0/10
+
+[Install]
+WantedBy = timers.target
+
