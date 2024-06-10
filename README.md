@@ -22,7 +22,7 @@ Since theoretically anyone known to Jethro might attend any service, each Attend
 
 ![img_11.png](img/customreports.png)
 
-Normally a Custom Report's purpose is to generate a tabular read-only 'report', there's no reason the SQL can't make changes to Jethro's database too. In our case, clicking on our 'report' causes and Attendance Group memberships are wiped and re-populated.
+Normally a Custom Report's purpose is to generate a tabular read-only 'report', there's no reason the SQL can't make changes to Jethro's database too. In our case, clicking on our 'report' causes Attendance Group memberships to be wiped and re-populated.
 
 While each Attendance Group has to contain every Jethro person, we set each person's group 'membership status' to reflect the likelihood of them attending. People in the 10am congregation get the highest 'Member' membership status in the '10am' Attendance Group, and thus appear at the top of the attendance marker's list. Next appear 10am'ers who are less regular ('Fringe' group membership status), and last of all, people in other congregations like 4pm ('Other Congregation' membership status).
 
