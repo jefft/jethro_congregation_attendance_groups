@@ -44,49 +44,49 @@ INNER JOIN congregation_group cg USING (groupid);
 SET @cf :=
   (SELECT id
    FROM custom_field
-   WHERE name='Secondary Congregations'); -- This is where we populate CAGs and decide what membership status each has.
+   WHERE name='Secondary Congregations'); --
+
+-- This is where we populate CAGs and decide what membership status each has.
 -- YOU WILL LIKELY NEED TO CUSTOMIZE THIS! Your Person Statuses and Group Membership Status Options will likely be different from those assumed below. Both can be seen in the System Configuration page of Jethro.
 -- - You will see 'Person Status Options' listed (e.g. 'Core' ,'Crowd', 'Newcomer') without numbers. They begin at index 0 (i.e. 0 = Core).
 -- - You will see Group Membership Status Options' listed with numbers. E.g. Member = 1
-
+ 
 
 INSERT INTO person_group_membership (personid, groupid, membership_status, created)
-SELECT _person.id AS personid,
-       cg.groupid,
-       (CASE
-            WHEN _person.congregationid = cg.congregationid
-                 OR secondarycongregation.id = cg.congregationid THEN CASE _person.status
+SELECT _person.id AS personid, 
+       cg.groupid, 
+       (CASE 
+            WHEN _person.congregationid = cg.congregationid 
+                 OR secondarycongregation.id = cg.congregationid THEN CASE _person.status 
                                                                           WHEN 0 THEN 1 -- Core -> Member
-
-                                                                          WHEN 1 THEN @pgms_fringe -- Flock -> Member
-
-                                                                          WHEN 2 THEN @pgms_fringe -- Connecting -> Member
-
-                                                                          WHEN 3 THEN 2 -- Staff -> Leader
-
-                                                                          WHEN 4 THEN 7 -- Fringe -> Fringe
-
-                                                                          WHEN 5 THEN 7 -- Satellite Members -> Fringe   (e.g. Tina Edwards - no attendance)
-
-                                                                          WHEN 6 THEN 1 -- Youth Contact -> Member
-
-                                                                          ELSE @pgms_fringe -- * -> Fringe
-
-                                                                      END
+ 
+                                                                          WHEN 1 THEN 1 -- Flock -> Member
+ 
+                                                                          WHEN 2 THEN 1 -- Connecting -> Member
+ 
+                                                                          WHEN 3 THEN 1 -- Staff -> Member
+ 
+                                                                          WHEN 4 THEN 1 -- Fringe -> Member
+ 
+                                                                          WHEN 5 THEN @pgms_othercongregation -- Satellite Members -> Other Congregation
+ 
+                                                                          ELSE @pgms_othercongregation -- * -> Other
+ 
+                                                                      END 
             ELSE @pgms_othercongregation -- Other Congregation
-
-        END) AS membership_status,
+ 
+        END) AS membership_status, 
        _person.created AS created
 FROM _person
 CROSS JOIN congregation_group cg -- cross join because we want a new person_group_membership record for EACH congregation group
 LEFT JOIN -- Pull in the 'Secondary Congregations'
-
-  (SELECT cfv.personid,
-          congregation.id
-   FROM custom_field_value cfv
-   JOIN custom_field cf ON cf.id=cfv.fieldid
-   JOIN custom_field_option cfo ON cfo.id=cfv.value_optionid
-   JOIN congregation ON congregation.name=cfo.value
+ 
+  (SELECT cfv.personid, 
+          congregation.id 
+   FROM custom_field_value cfv 
+   JOIN custom_field cf ON cf.id=cfv.fieldid 
+   JOIN custom_field_option cfo ON cfo.id=cfv.value_optionid 
+   JOIN congregation ON congregation.name=cfo.value 
    WHERE cf.id=@cf) AS secondarycongregation ON secondarycongregation.personid=_person.id
-AND secondarycongregation.id=cg.congregationid
-WHERE _person.status<>'archived';
+AND secondarycongregation.id=cg.congregationid 
+WHERE _person.congregationid is not null and _person.status not in ('archived', 'contact');
