@@ -1,12 +1,19 @@
-#!/bin/bash
+#!/bin/bash -eu
 
 [[ $EUID = 0 ]] || { echo >&2 "Must run as sudo / root"; exit 1; }
 
-systemctl enable `pwd`/jethro_attendancegroup_refresher.service
-systemctl enable `pwd`/jethro_attendancegroup_refresher.timer
+basedir="$(dirname "$(readlink -f "$0")")"
+servicename=jethro_attendancegroup_refresher@"$ATL_TENANT"
+
+cd /etc/systemd/system
+ln -sf "$basedir/jethro_attendancegroup_refresher@.service" "$servicename".service
+ln -sf "$basedir/jethro_attendancegroup_refresher@.timer" "$servicename".timer
 systemctl daemon-reload
-systemctl start jethro_attendancegroup_refresher.timer
-systemctl list-timers jethro\*
-
-echo "Systemd service and timer files should now be copied to /etc/systemd/system/"
-
+systemctl start "$servicename".timer
+if systemctl -q is-enabled "$servicename".timer; then
+	echo "$servicename.timer is installed"
+else
+	echo >&2 "failed to install $servicename.timer"
+	exit 1
+fi
+#systemctl list-timers jethro\*
