@@ -1,5 +1,7 @@
 # Congregation Attendance Groups
 
+(Note: this branch is for Jethro 2.35.1 and earlier. Later versions have a schema change (#1035))
+
 ## The problem
 
 Jethro has an attendance marking problem. Everyone must be in just one congregation, and it is assumed that people will attend only that congregation. If you have, say, 10am and 4pm services, and a 10am person attends 4pm one day, you can't track that. The person would be marked absent by the 10am attendance marker and, not being listed for the 4pm, could count only towards to general headcount in 4pm.
