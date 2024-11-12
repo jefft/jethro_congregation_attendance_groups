@@ -136,7 +136,7 @@ Either way, now click `Step 2 - Show Congregation Attendance Groups` to verify t
 
 Next, click `Step 3 - one-off - create and populate Secondary Congregations customfield`. Now:
  - Under Admin -> Custom Fields, you will see a new 'Secondary Congregations' field.
- - Under Person -> Reports, you will see a new 'People in Secondary Congregations' report. If you had pre-existing congregation groups, you will see that 'Secondary Congregations' has been set for people whom it was implied. E.g. if Simon is in congregation 'Sun 10am' but was in a congregation group 'Sun 4pm', then he gets a 'Sun 4pm' Secondary Congregation.
+ - Under Person -> Reports, you will see a new 'People in Secondary Congregations' report.
 
 ### Step 4
 
