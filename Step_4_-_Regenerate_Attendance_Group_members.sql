@@ -48,7 +48,7 @@ SET @cf :=
 
 -- This is where we populate CAGs and decide what membership status each has.
 -- YOU WILL LIKELY NEED TO CUSTOMIZE THIS! Your Person Statuses and Group Membership Status Options will likely be different from those assumed below. Both can be seen in the System Configuration page of Jethro.
--- - You will see 'Person Status Options' listed (e.g. 'Core' ,'Crowd', 'Newcomer') without numbers. They begin at index 0 (i.e. 0 = Core).
+-- - You will see 'Person Status Options' listed (e.g. 'Core' ,'Crowd', 'Newcomer') without numbers. They begin at index 1 (i.e. 1 = Core).
 -- - You will see Group Membership Status Options' listed with numbers. E.g. Member = 1
  
 
@@ -57,18 +57,18 @@ SELECT _person.id AS personid,
        cg.groupid, 
        (CASE 
             WHEN _person.congregationid = cg.congregationid 
-                 OR secondarycongregation.id = cg.congregationid THEN CASE _person.status 
-                                                                          WHEN 0 THEN 1 -- Core -> Member
+                 OR secondarycongregation.id = cg.congregationid THEN CASE person_status.id 
+                                                                          WHEN 1 THEN 4 -- Regular -> Regular
  
-                                                                          WHEN 1 THEN 1 -- Flock -> Member
+                                                                          WHEN 2 THEN 11 -- Irregular -> Irregular
  
-                                                                          WHEN 2 THEN 1 -- Connecting -> Member
+                                                                          WHEN 3 THEN 9 -- Visitor -> Visitor
  
-                                                                          WHEN 3 THEN 1 -- Staff -> Member
+                                                                          WHEN 4 THEN 36 -- Tourist -> Tourist
  
-                                                                          WHEN 4 THEN 1 -- Fringe -> Member
+                                                                          WHEN 5 THEN 43 -- Contact -> Irregular
  
-                                                                          WHEN 5 THEN @pgms_othercongregation -- Satellite Members -> Other Congregation
+                                                                          WHEN 6 THEN 11 -- Archived -> Irregular
  
                                                                           ELSE @pgms_othercongregation -- * -> Other
  
@@ -78,6 +78,11 @@ SELECT _person.id AS personid,
         END) AS membership_status, 
        _person.created AS created
 FROM _person
+JOIN 
+  (SELECT *
+   FROM congregation 
+   WHERE attendance_recording_days>0) c ON c.id=_person.congregationid   -- CAGs only include people who attend an attendance-recording congregation, not e.g. a 'supporters' congregation
+JOIN (select * from person_status where require_congregation=1) person_status ON person_status.id = _person.status
 CROSS JOIN congregation_group cg -- cross join because we want a new person_group_membership record for EACH congregation group
 LEFT JOIN -- Pull in the 'Secondary Congregations'
  
@@ -88,5 +93,4 @@ LEFT JOIN -- Pull in the 'Secondary Congregations'
    JOIN custom_field_option cfo ON cfo.id=cfv.value_optionid 
    JOIN congregation ON congregation.name=cfo.value 
    WHERE cf.id=@cf) AS secondarycongregation ON secondarycongregation.personid=_person.id
-AND secondarycongregation.id=cg.congregationid 
-WHERE _person.congregationid is not null and _person.status not in ('archived', 'contact');
+AND secondarycongregation.id=cg.congregationid;
