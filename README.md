@@ -134,7 +134,7 @@ Either way, now click `Step 2 - Show Congregation Attendance Groups` to verify t
 
 ### Step 3
 
-Next, click `Step 3 - one-off - create and populate Secondary Congregations customfield`. Now:
+Next, click `Step 3 - one-off - create Secondary Congregations customfield`. Now:
  - Under Admin -> Custom Fields, you will see a new 'Secondary Congregations' field.
  - Under Person -> Reports, you will see a new 'People in Secondary Congregations' report.
 

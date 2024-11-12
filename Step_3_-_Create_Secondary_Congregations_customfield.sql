@@ -1,4 +1,4 @@
-SELECT '''Secondary Congregations'' custom field created and populated with people in Congregation Groups that aren''t their native congregation. Also created a ''People in Secondary Congregations'' report' AS outcome;
+SELECT '''Secondary Congregations'' custom field created. Also created a ''People in Secondary Congregations'' report' AS outcome;
 
 -- Create 'Secondary Congregations' custom field, if not already existing, populated with the names of the existing congregations.
 --
