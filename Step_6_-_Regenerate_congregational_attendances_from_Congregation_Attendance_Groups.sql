@@ -1,17 +1,15 @@
 SELECT 'Congregation attendance records have been regenerated for Congregational Attendance Groups' AS outcome;
+BEGIN;
+
 
 -- This view returns all the attendance groups whose attendances will be rolled up and combined into Congregational attendances.
--- This example returns the CAGs plus 3 hand-populated groups ('Infants Sunday School', 'Youth Sunday School').
+-- This example returns the CAGs plus groups that meet only on Sunday
 
 CREATE VIEW if not exists rolledup_attendance_groups AS
 SELECT groupid
 FROM congregation_group
 UNION
-SELECT 22
-UNION
-SELECT 23
-UNION
-SELECT 24;
+SELECT id from _person_group where attendance_recording_days = 1 and is_archived=0; -- 1 is Sunday, according to the 'attendance_recording_days' bitmask in db_object/congregation.class.php
 
 -- Nuke all existing congregation (groupid=0) attendance records
 
@@ -141,3 +139,5 @@ INSERT INTO congregation_headcount --
    WHERE congregationid IS NOT NULL )
 SELECT *
 FROM FINAL;
+
+COMMIT;
