@@ -140,11 +140,12 @@ Next, click `Step 3 - one-off - create and populate Secondary Congregations cust
 
 ### Step 4
 
-Now we come to `Step 4 - Regenerate Attendance Group Members`, which contains the rules on how to set Attendance Group membership statuses for each person, given their congregation, status and Secondary Congregations. This is the one SQL file that you probably should edit before proceeding. It's quite safe to run the unedited version - you just won't get the desired mapping until you do some customizing.
+Now we come to `Step 4 - Regenerate Attendance Group Members`, which populates the Attendance Groups. Most people can just click this to run it. It is safe to run this as many times as you need to. The SQL wipes and regenerates the memberships from scratch each time.
 
-By default, the SQL:
- - creates two new Group Membership Status Options: `Other Congregation` and `Fringe`. 
- - populates the Attendance Groups, using 
+After running this, go to Groups -> List All, find your Attendance Groups, and you should find them all populated with members, with membership status set appropriately per group.
+
+`Step 4 - Regenerate Attendance Group Members` contains the rules on how to set Attendance Group membership statuses for each person, given their congregation, status and Secondary Congregations. By default, person statuses ('Core', 'Flock' etc) are mapped directly to group statuses, except for people not in the CAG's congregation, who get the 'Other Congregation' group status. If you want a custom person-to-group-status mapping, you could edit this SQL file first and change to something like:
+
 ```sql
        (CASE
             WHEN _person.congregationid = cg.congregationid
@@ -169,13 +170,6 @@ By default, the SQL:
             ELSE @pgms_othercongregation -- Other Congregation
 ```
 
-In English: if a person's native congregation or 'Secondary Congregation' matches the Attendance Group, then set their membership status according to their status (defaulting to `Fringe`). Otherwise if they're not in the Attendance Group, set their status to `Other Congregation`.
-
-Your Person Status Options (the `WHEN x` part) and Group Membership Status Options (the `THEN y` part) are almost certainly not what the comments above imply, so you will need to customize this part.
-
-After customizing `Step_4_-_Regenerate_Attendance_Group_members.sql`, run it by clicking the `Step 4 - Regenerate Attendance Group Memberss` report in Jethro. It is safe to do this as many times as you need to, to get the mappings correct. The SQL wipes and regenerates the memberships from scratch each time.
-
-After running this, go to Groups -> List All, find your Attendance Groups, and you should find them all populated with members, with membership status set appropriately per group.
 
 
 ### Step 5
