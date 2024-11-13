@@ -1,32 +1,32 @@
 SELECT 'Congregation attendance records have been regenerated for Congregational Attendance Groups' AS outcome;
+
 BEGIN;
 
-
--- This view returns all the attendance groups whose attendances will be rolled up and combined into Congregational attendances.
--- This example returns the CAGs plus groups that meet only on Sunday
-
-CREATE VIEW if not exists rolledup_attendance_groups AS
-SELECT groupid
-FROM congregation_group
-UNION
-SELECT id from _person_group where attendance_recording_days = 1 and is_archived=0; -- 1 is Sunday, according to the 'attendance_recording_days' bitmask in db_object/congregation.class.php
-
 -- Nuke all existing congregation (groupid=0) attendance records
-
 
 DELETE
 FROM attendance_record
 WHERE groupid=0;
 
 -- Insert congregation attendance records for each CAG attendance record, bit_or()'ing the attendance bit.
-
+ 
 INSERT INTO attendance_record (date, personid, groupid, present, checkinid)
-SELECT DISTINCT date, personid,
-                      0 AS groupid,
-                      bit_or(present) AS present,
+SELECT DISTINCT date, personid, 
+                      0 AS groupid, 
+                      bit_or(present) AS present, 
                       NULL AS checkinid
 FROM attendance_record
-JOIN rolledup_attendance_groups USING (groupid)
+JOIN -- 
+-- This subquery returns all the attendance groups whose attendances will be rolled up and combined into Congregational attendances.
+-- This example returns the CAGs plus groups that meet only on Sunday (Sunday school attendees are often tracked as a group, rather than a congregation).
+ 
+  (SELECT groupid 
+   FROM congregation_group 
+   UNION SELECT id 
+   FROM _person_group 
+   WHERE attendance_recording_days = 1 
+     AND is_archived=0 -- 1 is Sunday, according to the 'attendance_recording_days' bitmask in db_object/congregation.class.php
+) rolledup_attendance_groups USING (groupid)
 GROUP BY date, personid;
 
 -- Nuke the headcounts
@@ -64,8 +64,7 @@ INSERT INTO congregation_headcount --
    FROM attendance_record ar 
    JOIN congregation_group cg USING (groupid) 
    WHERE present=1 
-   GROUP BY groupid,date 
-   ), --
+   GROUP BY groupid,date), --
 -- Calculate HG(c)
 -- +------------+---------+-----------+
 -- | date       | groupid | headcount |
@@ -136,8 +135,9 @@ INSERT INTO congregation_headcount --
   (SELECT date,congregationid,
                cong_headcount AS number
    FROM x
-   WHERE congregationid IS NOT NULL )
+   WHERE congregationid IS NOT NULL)
 SELECT *
 FROM FINAL;
+
 
 COMMIT;
