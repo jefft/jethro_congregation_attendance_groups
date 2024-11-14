@@ -3,6 +3,8 @@ SELECT 'Congregation attendance records have been regenerated for Congregational
 BEGIN;
 
 -- Nuke all existing congregation (groupid=0) attendance records
+CREATE TABLE IF NOT EXISTS attendance_record_pre_cag AS
+SELECT * FROM attendance_record;
 
 DELETE
 FROM attendance_record
@@ -30,6 +32,9 @@ JOIN --
 GROUP BY date, personid;
 
 -- Nuke the headcounts
+
+CREATE TABLE IF NOT EXISTS congregation_headcount_pre_cag AS
+SELECT * FROM congregation_headcount;
 
 DELETE
 FROM congregation_headcount;
