@@ -19,6 +19,10 @@ WHERE ar.groupid=0 ON duplicate KEY
   UPDATE present = attendance_record.present |
   VALUES(present);
 
---  AND ar.personid=468 AND ar.date='2024-05-12'
+-- Copy each historical congregation headcount to its CG headcount.
+INSERT INTO person_group_headcount (date, person_groupid, number)
+SELECT date, groupid, number
+FROM congregation_headcount
+JOIN congregation_group cg USING (congregationid);
 
 COMMIT;
